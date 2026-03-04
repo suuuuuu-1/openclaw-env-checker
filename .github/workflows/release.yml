@@ -7,7 +7,23 @@ on:
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - os: ubuntu-latest
+            target: node22-linux-x64
+            output: openclaw-check-linux-x64
+          - os: macos-latest
+            target: node22-macos-x64
+            output: openclaw-check-macos-x64
+          - os: macos-latest
+            target: node22-macos-arm64
+            output: openclaw-check-macos-arm64
+          - os: windows-latest
+            target: node22-win-x64
+            output: openclaw-check-win-x64.exe
+
+    runs-on: ${{ matrix.os }}
 
     steps:
       - name: Checkout code
@@ -25,16 +41,27 @@ jobs:
         run: npm run build
 
       - name: Package
-        run: npm run package
+        run: npx @yao-pkg/pkg dist/check-env.cjs --targets ${{ matrix.target }} --output dist/${{ matrix.output }} --compress GZip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.output }}
+          path: dist/${{ matrix.output }}
+
+  release:
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download all artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
 
       - name: Create Release
         uses: softprops/action-gh-release@v1
         with:
-          files: |
-            dist/openclaw-check-win-x64.exe
-            dist/openclaw-check-macos-x64
-            dist/openclaw-check-macos-arm64
-            dist/openclaw-check-linux-x64
+          files: dist/**/*
           draft: false
           prerelease: false
         env:
