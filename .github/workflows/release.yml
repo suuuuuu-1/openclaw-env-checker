@@ -43,11 +43,19 @@ jobs:
       - name: Package
         run: npx @yao-pkg/pkg dist/check-env.cjs --targets ${{ matrix.target }} --output dist/${{ matrix.output }} --compress GZip
 
+      - name: Create DMG (macOS only)
+        if: runner.os == 'macOS'
+        run: |
+          chmod +x create-app.sh
+          ./create-app.sh
+
       - name: Upload artifact
         uses: actions/upload-artifact@v4
         with:
           name: ${{ matrix.output }}
-          path: dist/${{ matrix.output }}
+          path: |
+            dist/${{ matrix.output }}
+            dist/*.dmg
 
   release:
     needs: build

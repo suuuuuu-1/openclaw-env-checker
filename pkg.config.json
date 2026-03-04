@@ -1,0 +1,6 @@
+{
+  "scripts": [],
+  "assets": [],
+  "targets": ["node22"],
+  "outputPath": "dist"
+}
