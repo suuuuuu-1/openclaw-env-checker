@@ -5,7 +5,12 @@ import { homedir } from "node:os";
 const IS_WIN = process.platform === "win32";
 const MIN_NODE_MAJOR = 22;
 
-console.log("=== OpenClaw Manager 环境检查 ===\n");
+// ANSI color codes
+const GREEN = "\x1b[32m";
+const RED = "\x1b[31m";
+const RESET = "\x1b[0m";
+
+console.log("=== OpenClaw Manager Environment Check ===\n");
 
 let passed = 0;
 let failed = 0;
@@ -14,45 +19,45 @@ function check(name, fn) {
   try {
     const result = fn();
     if (result === true || result === undefined) {
-      console.log(`✓ ${name}`);
+      console.log(`${GREEN}✓ ${name}${RESET}`);
       passed++;
     } else {
-      console.log(`✗ ${name}: ${result}`);
+      console.log(`${RED}✗ ${name}: ${result}${RESET}`);
       failed++;
     }
   } catch (err) {
-    console.log(`✗ ${name}: ${err.message}`);
+    console.log(`${RED}✗ ${name}: ${err.message}${RESET}`);
     failed++;
   }
 }
 
-// 1. Node.js 版本
+// 1. Node.js version
 check("Node.js >= 22.12.0", () => {
   const version = process.version;
   const major = parseInt(version.match(/^v(\d+)/)[1], 10);
   if (major < MIN_NODE_MAJOR) {
-    return `当前版本 ${version}，需要 >= 22.12.0`;
+    return `Current version ${version}, requires >= 22.12.0`;
   }
-  console.log(`  版本: ${version}`);
+  console.log(`  Version: ${version}`);
   return true;
 });
 
 // 2. npm
-check("npm 可用", () => {
+check("npm available", () => {
   const version = execSync("npm -v", { stdio: "pipe" }).toString().trim();
-  console.log(`  版本: ${version}`);
+  console.log(`  Version: ${version}`);
   return true;
 });
 
 // 3. Git
-check("Git 可用", () => {
+check("Git available", () => {
   const version = execSync("git --version", { stdio: "pipe" }).toString().trim();
   console.log(`  ${version}`);
   return true;
 });
 
-// 4. 网络 - github.com
-check("网络: github.com", () => {
+// 4. Network - github.com
+check("Network: github.com", () => {
   try {
     execSync("git ls-remote https://github.com/git/git.git HEAD", {
       stdio: "pipe",
@@ -60,12 +65,12 @@ check("网络: github.com", () => {
     });
     return true;
   } catch {
-    return "无法访问，请检查网络或代理";
+    return "Cannot access, please check network or proxy";
   }
 });
 
-// 5. 网络 - registry.npmjs.org
-check("网络: registry.npmjs.org", () => {
+// 5. Network - registry.npmjs.org
+check("Network: registry.npmjs.org", () => {
   try {
     execSync("npm ping --registry https://registry.npmjs.org", {
       stdio: "pipe",
@@ -73,12 +78,12 @@ check("网络: registry.npmjs.org", () => {
     });
     return true;
   } catch {
-    return "无法访问，请检查网络或代理";
+    return "Cannot access, please check network or proxy";
   }
 });
 
-// 6. 网络 - direct.evolink.ai
-check("网络: direct.evolink.ai", () => {
+// 6. Network - direct.evolink.ai
+check("Network: direct.evolink.ai", () => {
   try {
     if (IS_WIN) {
       execSync("curl -s -o nul -w \"%{http_code}\" https://direct.evolink.ai", {
@@ -93,56 +98,56 @@ check("网络: direct.evolink.ai", () => {
     }
     return true;
   } catch {
-    return "无法访问，请检查网络";
+    return "Cannot access, please check network";
   }
 });
 
-// 7. npm 全局安装权限
-check("npm 全局安装权限", () => {
+// 7. npm global install permission
+check("npm global install permission", () => {
   try {
     const prefix = execSync("npm config get prefix", { stdio: "pipe" })
       .toString()
       .trim();
     console.log(`  prefix: ${prefix}`);
 
-    // 检查是否在用户目录
+    // Check if in user directory
     const home = homedir();
     if (prefix.startsWith(home)) {
       return true;
     }
 
-    // 检查是否有写入权限
+    // Check write permission
     if (IS_WIN) {
-      return "Windows 需要管理员权限运行";
+      return "Windows requires administrator privileges";
     } else {
-      return "可能需要 sudo 或配置用户级 npm prefix";
+      return "May require sudo or user-level npm prefix configuration";
     }
   } catch {
-    return "无法检测";
+    return "Cannot detect";
   }
 });
 
-// 8. OpenClaw CLI（可选）
-check("OpenClaw CLI（可选）", () => {
+// 8. OpenClaw CLI (optional)
+check("OpenClaw CLI (optional)", () => {
   try {
     const version = execSync("openclaw --version", { stdio: "pipe" })
       .toString()
       .trim();
-    console.log(`  版本: ${version}`);
+    console.log(`  Version: ${version}`);
     return true;
   } catch {
-    return "未安装（首次运行会自动安装）";
+    return "Not installed (will be auto-installed on first run)";
   }
 });
 
-console.log(`\n=== 检查完成 ===`);
-console.log(`通过: ${passed} 项`);
-console.log(`失败: ${failed} 项\n`);
+console.log(`\n=== Check Complete ===`);
+console.log(`${GREEN}Passed: ${passed}${RESET}`);
+console.log(`${RED}Failed: ${failed}${RESET}\n`);
 
 if (failed > 0) {
-  console.log("请先解决失败项，再运行 OpenClaw Manager");
+  console.log(`${RED}Please resolve failed items before running OpenClaw Manager${RESET}`);
   process.exit(1);
 } else {
-  console.log("✓ 环境检查通过，可以运行 OpenClaw Manager");
+  console.log(`${GREEN}✓ Environment check passed, ready to run OpenClaw Manager${RESET}`);
   process.exit(0);
 }
