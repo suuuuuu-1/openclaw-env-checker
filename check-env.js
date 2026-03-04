@@ -1,6 +1,7 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
 import { homedir } from "node:os";
+import { createInterface } from "node:readline";
 
 const IS_WIN = process.platform === "win32";
 const MIN_NODE_MAJOR = 22;
@@ -146,8 +147,18 @@ console.log(`${RED}Failed: ${failed}${RESET}\n`);
 
 if (failed > 0) {
   console.log(`${RED}Please resolve failed items before running OpenClaw Manager${RESET}`);
-  process.exit(1);
 } else {
   console.log(`${GREEN}✓ Environment check passed, ready to run OpenClaw Manager${RESET}`);
-  process.exit(0);
 }
+
+// Wait for user input before closing (especially for Windows)
+console.log("\nPress Enter to exit...");
+const rl = createInterface({
+  input: process.stdin,
+  output: process.stdout
+});
+
+rl.question("", () => {
+  rl.close();
+  process.exit(failed > 0 ? 1 : 0);
+});
