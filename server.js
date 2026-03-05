@@ -12,15 +12,15 @@ app.get("/api/check", async (req, res) => {
 
   // Node.js check
   try {
-    const version = process.version;
+    const version = execSync("node -v", { stdio: "pipe" }).toString().trim();
     const major = parseInt(version.match(/^v(\d+)/)[1], 10);
     results.push({
       name: "Node.js >= 22.12.0",
       status: major >= 22 ? "pass" : "fail",
       message: `Version: ${version}`,
     });
-  } catch (err) {
-    results.push({ name: "Node.js >= 22.12.0", status: "fail", message: err.message });
+  } catch {
+    results.push({ name: "Node.js >= 22.12.0", status: "fail", message: "Not installed" });
   }
 
   // npm check
@@ -40,14 +40,16 @@ app.get("/api/check", async (req, res) => {
   }
 
   // Network checks
+  const IS_WIN = process.platform === "win32";
   const checks = [
     { name: "Network: github.com", cmd: "git ls-remote https://github.com/git/git.git HEAD" },
     { name: "Network: registry.npmjs.org", cmd: "npm ping --registry https://registry.npmjs.org" },
+    { name: "Network: direct.evolink.ai", cmd: IS_WIN ? 'curl -s -o nul -w "%{http_code}" https://direct.evolink.ai' : 'curl -s -o /dev/null -w "%{http_code}" https://direct.evolink.ai' },
   ];
 
   for (const check of checks) {
     try {
-      execSync(check.cmd, { stdio: "pipe", timeout: 10000 });
+      execSync(check.cmd, { stdio: "pipe", timeout: 15000 });
       results.push({ name: check.name, status: "pass", message: "OK" });
     } catch {
       results.push({ name: check.name, status: "fail", message: "Cannot access" });

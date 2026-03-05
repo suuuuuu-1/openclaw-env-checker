@@ -2,6 +2,7 @@
 import { execSync } from "node:child_process";
 import { writeFileSync } from "node:fs";
 import { join } from "node:path";
+import { tmpdir } from "node:os";
 
 const IS_WIN = process.platform === "win32";
 const MIN_NODE_MAJOR = 22;
@@ -12,15 +13,15 @@ const results = [];
 
 // Node.js check
 try {
-  const version = process.version;
+  const version = execSync("node -v", { stdio: "pipe" }).toString().trim();
   const major = parseInt(version.match(/^v(\d+)/)[1], 10);
   results.push({
     name: "Node.js >= 22.12.0",
     status: major >= MIN_NODE_MAJOR ? "pass" : "fail",
     message: `Version: ${version}`,
   });
-} catch (err) {
-  results.push({ name: "Node.js >= 22.12.0", status: "fail", message: err.message });
+} catch {
+  results.push({ name: "Node.js >= 22.12.0", status: "fail", message: "Not installed" });
 }
 
 // npm check
@@ -159,7 +160,7 @@ ${results.map(r => `    <div class="check-item">
 </body>
 </html>`;
 
-const outputPath = join(process.cwd(), "check-result.html");
+const outputPath = join(tmpdir(), "openclaw-check-result.html");
 writeFileSync(outputPath, html);
 
 console.log(`Check complete. Results saved to: ${outputPath}\n`);
