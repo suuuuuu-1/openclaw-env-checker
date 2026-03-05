@@ -1,6 +1,5 @@
 #!/usr/bin/env node
 import { execSync } from "node:child_process";
-import { homedir } from "node:os";
 import { createInterface } from "node:readline";
 
 const IS_WIN = process.platform === "win32";
@@ -100,44 +99,6 @@ check("Network: direct.evolink.ai", () => {
     return true;
   } catch {
     return "Cannot access, please check network";
-  }
-});
-
-// 7. npm global install permission
-check("npm global install permission", () => {
-  try {
-    const prefix = execSync("npm config get prefix", { stdio: "pipe" })
-      .toString()
-      .trim();
-    console.log(`  prefix: ${prefix}`);
-
-    // Check if in user directory
-    const home = homedir();
-    if (prefix.startsWith(home)) {
-      return true;
-    }
-
-    // Check write permission
-    if (IS_WIN) {
-      return "Windows requires administrator privileges";
-    } else {
-      return "May require sudo or user-level npm prefix configuration";
-    }
-  } catch {
-    return "Cannot detect";
-  }
-});
-
-// 8. OpenClaw CLI (optional)
-check("OpenClaw CLI (optional)", () => {
-  try {
-    const version = execSync("openclaw --version", { stdio: "pipe" })
-      .toString()
-      .trim();
-    console.log(`  Version: ${version}`);
-    return true;
-  } catch {
-    return "Not installed (will be auto-installed on first run)";
   }
 });
 

@@ -30,7 +30,7 @@ cat > "$MACOS_DIR/launcher.sh" << 'EOF'
 #!/bin/bash
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 osascript -e "tell application \"Terminal\"
-    do script \"cd '$DIR' && ./openclaw-check; echo ''; echo 'Press any key to close...'; read -n 1; exit\"
+    do script \"cd '$DIR' && ./openclaw-check\"
     activate
 end tell"
 EOF
