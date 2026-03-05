@@ -7,13 +7,14 @@ CONTENTS_DIR="$APP_DIR/Contents"
 MACOS_DIR="$CONTENTS_DIR/MacOS"
 RESOURCES_DIR="$CONTENTS_DIR/Resources"
 
-# Detect architecture
-ARCH=$(uname -m)
-if [ "$ARCH" = "arm64" ]; then
-  BINARY="openclaw-check-macos-arm64"
+# Detect architecture (can be overridden via argument: ./create-app.sh arm64|x64)
+if [ -n "$1" ]; then
+  ARCH="$1"
 else
-  BINARY="openclaw-check-macos-x64"
+  ARCH=$(uname -m)
+  [ "$ARCH" != "arm64" ] && ARCH="x64"
 fi
+BINARY="openclaw-check-macos-$ARCH"
 
 echo "Creating .app bundle for $ARCH..."
 

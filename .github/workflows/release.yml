@@ -16,9 +16,11 @@ jobs:
           - os: macos-latest
             target: node22-macos-x64
             output: openclaw-check-macos-x64
+            arch: x64
           - os: macos-latest
             target: node22-macos-arm64
             output: openclaw-check-macos-arm64
+            arch: arm64
           - os: windows-latest
             target: node22-win-x64
             output: openclaw-check-win-x64.exe
@@ -47,7 +49,7 @@ jobs:
         if: runner.os == 'macOS'
         run: |
           chmod +x create-app.sh
-          ./create-app.sh
+          ./create-app.sh ${{ matrix.arch }}
 
       - name: Upload DMG (macOS only)
         if: runner.os == 'macOS'

@@ -29,5 +29,3 @@ npm run package
 2. npm 可用
 3. Git 可用
 4. 网络连通性（github.com、npmjs.org、evolink.ai）
-5. npm 全局安装权限
-6. OpenClaw CLI（可选）
